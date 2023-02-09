@@ -187,6 +187,10 @@ public class AddressableLoader
 				//for (int i = 0; i < m_RequestCount; i++) {
 				//	m_RunnningOperations.Add(Addressables.LoadAssetAsync<object>(m_RequestQueues[i].key), m_RequestQueues[i].callback);
 				//}
+				NextState(EAddressableLoadState.Load);
+				break;
+
+			case EAddressableLoadState.Load:
 				Debug.Log($"Operation : {m_RunningOperations.Count} / {Time.frameCount}");
 				//ロードする
 				foreach (var operation in m_RunningOperations) {
@@ -198,6 +202,10 @@ public class AddressableLoader
 						operation.Value?.Invoke(handle.Result);
 					}
 				}
+				NextState(EAddressableLoadState.Release);
+				break;
+
+			case EAddressableLoadState.Release:
 				// ハンドルを開放する
 				foreach (var operation in m_RunningOperations) {
 					Addressables.Release(operation.Key);
@@ -249,7 +257,6 @@ public class AddressableManager : MonoBehaviour
 	async void Update()
 	{
 		if(m_EnqueueLoader.Count > 0){ 
-			Debug.LogWarning(m_EnqueueLoader.Count);
 			foreach(AddressableLoader loader in m_EnqueueLoader){
 				await loader.Update();
 			}
